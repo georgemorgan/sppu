@@ -34,7 +34,7 @@ extern void ppu_write(void *address, uint8_t value);
 
 /* ~ Reads from an internal PPU address. ~ */
 
-extern uint8_t ppu_write(void *address);
+extern uint8_t ppu_read(void *address);
 
 /* ~ Simulates the DMA of SPR-RAM. The length is assumed. ~ */
 

@@ -30,4 +30,6 @@ struct _operation {
 
 void sppu_help(OPERATION_PARAMETERS);
 
+void sppu_load(OPERATION_PARAMETERS);
+
 #endif
