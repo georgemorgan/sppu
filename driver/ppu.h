@@ -2,6 +2,12 @@
 
 #define sppu_driver_h
 
+#include <flipper/types.h>
+
+#include <error/error.h>
+
+#include <fmr/fmr.h>
+
 /* ~ Declare the virtual interface for the PPU driver. ~ */
 
 extern const struct _ppu {
@@ -13,12 +19,18 @@ extern const struct _ppu {
 	void (* write)(void *address, uint8_t value);
 	
 	uint8_t (* read)(void *address);
+
+	void (* dma)(void *source);
 	
-};
+} ppu;
 
 /* ~ Define the private definitions of the driver functions. ~ */
 
-#ifndef private_include
+#ifdef __private_include__
+
+/* ~ Declare the enum overlay for this driver. ~ */
+
+enum { _ppu_configure, _ppu_load, _ppu_write, _ppu_read, _ppu_dma };
 
 /* ~ Configures the necessary IO to interface with the PPU. ~ */
 

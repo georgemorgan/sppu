@@ -8,7 +8,9 @@
 
 #include "sppu.h"
 
-#include "sppu_driver.h"
+#include <flipper/flipper.h>
+
+#include <ppu.h>
 
 struct _operation commands[] = {
 
@@ -16,7 +18,7 @@ struct _operation commands[] = {
 	
 	{ "load", "Transfers a .ppu (ppu dump) into the PPU's SRAM.", sppu_load },
 	
-	{ "clear", "Clears the PPU's frame buffer. (Blanks the screen.)", NULL },
+	{ "clear", "Clears the PPU's frame buffer. (Blanks the screen.)", sppu_clear },
 	
 	{ "print", "Displays a string on the display using the first character palette.", NULL },
 
@@ -38,17 +40,25 @@ void parse_arguments(int argc, char *argv[]) {
 
 int main(int argc, char *argv[]) {
 	
+	printf("\n");
+	
 	/* ~ Print usage information if no argument has been passed. ~ */
 	
 	if (argc < 2) {
 		
-		printf("Usage: sppu [help | load | clear | print | emulate]");
+		printf("Usage: sppu [help | load | clear | print | emulate]\n\n");
 		
 		return 0;
 		
 	}
 	
-	printf("\n");
+	/* ~ Attatch a Flipper device. ~ */
+	
+	flipper.attach(FLIPPER_SOURCE_USB);
+	
+	/* ~ Initialize the PPU module. ~ */
+	
+	ppu.configure();
 	
 	/* ~ Call the handlers for each argument. ~ */
 	
@@ -62,7 +72,7 @@ int main(int argc, char *argv[]) {
 
 void sppu_help(OPERATION_PARAMETERS) {
 	
-	printf("sppu\n");
+	printf(" sppu\n");
 	
 	int op_count = sizeof(commands) / sizeof(struct _operation);
 	
@@ -103,9 +113,23 @@ void sppu_load(OPERATION_PARAMETERS) {
 		
 	}
 	
+	void *source;
+	
 	char c;
 	
-	while ((c = fgetc(ppu_f)) != EOF) printf("0x%02x ", c);
+	while ((c = fgetc(ppu_f)) != EOF) { printf("0x%02x ", c); }
 	
+	printf("\n");
+	
+	/* ~ Load the data into the PPU. ~ */
+	
+	ppu.load(source, 8);
+	
+	
+}
+
+void sppu_clear(OPERATION_PARAMETERS) {
+	
+	ppu.dma(0);
 	
 }

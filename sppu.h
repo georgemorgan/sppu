@@ -32,4 +32,6 @@ void sppu_help(OPERATION_PARAMETERS);
 
 void sppu_load(OPERATION_PARAMETERS);
 
+void sppu_clear(OPERATION_PARAMETERS);
+
 #endif
