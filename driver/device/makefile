@@ -2,7 +2,7 @@ llvm_flags = -std=c99 -Os -target armv7-none-elf -march=arm7tdmi -mfloat-abi=sof
 
 all:
 	
-	clang $(llvm_flags) -c ../common.c ppu.c -I /usr/local/include -I /usr/local/include/flipper --sysroot "/Development/flipper-toolbox/resources/osx/arm-elf/arm-elf" -I "/Development/flipper-toolbox/resources/osx/arm-elf/arm-elf/include" -I ..
+	clang $(llvm_flags) -D__device_compilation__ -c ppu.c ../common.c -I .. -I /usr/local/include -I /usr/local/include/flipper --sysroot "/Development/flipper-toolbox/resources/osx/arm-elf/arm-elf" -I "/Development/flipper-toolbox/resources/osx/arm-elf/arm-elf/include"
 
 	arm-elf-gcc-4.7 -fPIC -nostdlib -ffreestanding -fomit-frame-pointer -Wl,-T dl.ld *.o -o ppu.elf
 
@@ -10,9 +10,9 @@ all:
 
 	arm-elf-objdump -D ppu.elf
 
-run: all
+load: all
 
-	flipper load ppu ppu.bin
+	flipper load io.flipper.ppu ppu.bin
 
 clean:
 

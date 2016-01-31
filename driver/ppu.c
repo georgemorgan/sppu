@@ -4,7 +4,7 @@
 
 /* ~ Create a handle for the module. ~ */
 
-fmr_handle handle;
+static fmr_handle handle;
 
 void ppu_configure(void) {
 	
@@ -20,31 +20,33 @@ void ppu_configure(void) {
 	
 }
 
-void ppu_load(void *source, uint16_t length) {
+void ppu_load(uint32_t source, uint16_t length) {
 	
 	/* ~ Resolves the new address of the data by moving it into the device's memory. ~ */
 	
-	void *resolved = fmr.resolve(source, length);
+	//uint32_t resolved = fmr.resolve(source, length);
 	
 	/* e.g Failed to load PPU data. Reason: Not enough memory. */
 	
-	if (!resolved) printf("Failed to resolve PPU data. Reason: %s", error.message());
+	//if (!resolved) printf("Failed to resolve PPU data. Reason: %s", error.message());
 	
 	/* ~ Invokes the function on the device. ~ */
 	
-	uint32_t ret = fmr.invoke(handle, _ppu_load, 0, resolved, length);
+	uint32_t ret = fmr.invoke(handle, _ppu_load, 4, fmr_argument(source), fmr_argument(length));
 	
 }
 
-void ppu_write(void *address, uint8_t value) {
+void ppu_write(uint32_t address, uint8_t value) {
 	
+	printf("Writing!\n");
 	
+	fmr.invoke(handle, _ppu_write, 4, fmr_argument(address), fmr_argument(value));
 	
 }
 
-uint8_t ppu_read(void *address) {
+uint8_t ppu_read(uint32_t address) {
 	
-	return 0;
+	return 	fmr.invoke(handle, _ppu_read, 2, fmr_argument(address));
 	
 }
 

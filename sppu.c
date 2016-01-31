@@ -12,6 +12,8 @@
 
 #include <ppu.h>
 
+#include <unistd.h>
+
 struct _operation commands[] = {
 
 	{ "help", "Displays this help message.", sppu_help },
@@ -60,9 +62,26 @@ int main(int argc, char *argv[]) {
 	
 	ppu.configure();
 	
+	/* ~ Get the status register. ~ */
+
+//	ppu.write(12, 0xde);
+//	
+//	uint32_t status = ppu.read(12);
+//	
+//	printf("\nThe VRAM value is 0x%02x\n\n", (uint8_t)status);
+
+	
+	/* ~ Write a one to address 7 of the PPU. ~ */
+	
+	for (int i = 0; i < 100; i ++) {
+		
+		ppu.write(0x2000 + i, i);
+		
+	}
+
 	/* ~ Call the handlers for each argument. ~ */
 	
-	parse_arguments(-- argc, ++ argv);
+	//parse_arguments(-- argc, ++ argv);
 	
 	printf("\n");
 	
@@ -117,13 +136,13 @@ void sppu_load(OPERATION_PARAMETERS) {
 	
 	char c;
 	
-	while ((c = fgetc(ppu_f)) != EOF) { printf("0x%02x ", c); }
+	while ((c = fgetc(ppu_f)) != EOF) { printf("0x%00xffx ", c); }
 	
 	printf("\n");
 	
 	/* ~ Load the data into the PPU. ~ */
 	
-	ppu.load(source, 8);
+	//ppu.load(source, 8);
 	
 	
 }

@@ -1,39 +1,194 @@
+#define __private_include__
+
 #include <ppu.h>
 
 #include "atmel.h"
 
-#define PIN 7
+/*
+ 
+ PPU -> FLIPPER PINOUT
+ 
+--------------------------------------------------+
+												  |
+  IO PIN	  PA PIN	PPU PIN					  |
+								 _				  |
+	13			30			AD7   |				  |
+	12			29			AD6   |				  |
+	11			28			AD5   |				  |
+	10			27			AD4   | DATA BUS	  |
+	04			26			AD3   |				  |
+	03			25			AD2   |				  |
+	02			24			AD1   |				  |
+	01			15			AD0  _|				  |
+								 _				  |
+	A1			20			A2	  |				  |
+	A2			19			A1	  | ADDRESS BUS	  |
+	A3			18			A0	 _|				  |
+								 _				  |
+	14			2			RW	  |	DIRECTION	  |
+	15			1			CS	 _| LATCH		  |
+												  |
+--------------------------------------------------+
+ 
+ RW writes on low, reads on high.
+ 
+ CS is active low.
+ 
+ PA19 (A2) May be used to generate a Fast Interrupt Request for servicing by the CPU.
+	-> This will be implemented to draw contiguous frame buffers to the screen during V-BLANK.
+ 
+*/
+
+#define DATAMASK ((0xFE << 23) | (1 << 15))
+
+#define DATAIN() AT91C_BASE_PIOA -> PIO_ODR |= DATAMASK;
+
+#define DATAOUT() AT91C_BASE_PIOA -> PIO_OER |= DATAMASK;
+
+#define ADDRMASK (7 << 18)
+
+#define RWMASK (1 << 2)
+
+#define READ() AT91C_BASE_PIOA -> PIO_CODR &= ~RWMASK; AT91C_BASE_PIOA -> PIO_SODR |= RWMASK;
+
+#define WRITE() AT91C_BASE_PIOA -> PIO_SODR &= ~RWMASK; AT91C_BASE_PIOA -> PIO_CODR |= RWMASK;
+
+#define CSMASK (1 << 1)
+
+#define LATCH() AT91C_BASE_PIOA -> PIO_SODR &= ~CSMASK; AT91C_BASE_PIOA -> PIO_CODR |= CSMASK;
+
+#define RELEASE() AT91C_BASE_PIOA -> PIO_CODR &= ~CSMASK; AT91C_BASE_PIOA -> PIO_SODR |= CSMASK;
+
+void ppu_write_internal(uint32_t address, uint8_t value);
 
 void ppu_configure(void) {
 	
+	/* ~ Enable the pins of the data bus, address bus, and direction. ~ */
 	
+	AT91C_BASE_PIOA -> PIO_PER |= DATAMASK | ADDRMASK | RWMASK | CSMASK;
+	
+	/* ~ Configure the pins of the data bus, address bus, and direction as outputs. ~ */
+	
+	AT91C_BASE_PIOA -> PIO_OER |= DATAMASK | ADDRMASK | RWMASK | CSMASK;
+	
+	/* ~ Enable single access writes to each pin. ~ */
+	
+	AT91C_BASE_PIOA -> PIO_OWER |= DATAMASK | ADDRMASK;
+	
+	/* ~ Increment VRAM address on write to PPUDATA. ~ */
+	
+	ppu_write_internal(PPUCTRL, 0x00);
+	
+	/* ~ Show background and sprites. ~ */
+	
+	ppu_write_internal(PPUMASK, 0x18);
 	
 }
 
-void ppu_load(void *source, uint16_t length) {
+void ppu_load(uint32_t source, uint16_t length) {
+
+	ppu_write_internal(PPUADDR, hi(0x2000));
 	
-	AT91C_BASE_PIOA -> PIO_PER |= (1 << PIN);
+	ppu_write_internal(PPUADDR, lo(0x2000));
 	
-	AT91C_BASE_PIOA -> PIO_OER |= (1 << PIN);
-	
-	AT91C_BASE_PIOA -> PIO_SODR |= (1 << PIN);
+//	for (int i = 0x2000; i < 0x4000; i ++) {
+//		
+//		ppu_write_internal(PPUSCROLL, (uint8_t)(i));
+//		
+//		ppu_write_internal(PPUDATA, (uint8_t)(i << length));
+//		
+//	}
 	
 }
 
-void ppu_write(void *address, uint8_t value) {
+/* ~ Sends data to the PPU's internal registers. ~ */
+
+void ppu_write_internal(uint32_t address, uint8_t value) {
 	
+	/* ~ Switch the direction of the data bus to outputs. ~ */
 	
+	DATAOUT();
+	
+	/* ~ Switch the PPU into write mode. ~ */
+	
+	WRITE();
+	
+	/* ~ Write the address and data. ~ */
+	
+	AT91C_BASE_PIOA -> PIO_ODSR = (address << 18) | ((value << 23) | ((value & 1) << 15));
+	
+	/* ~ Assert the chip select pin to latch the data. ~ */
+	
+	LATCH();
+	
+	/* ~ Deassert chip select pin to release the PPU. ~ */
+	
+	RELEASE();
 	
 }
 
-uint8_t ppu_read(void *address) {
+/* ~ Sends data to VRAM. ~ */
+
+void ppu_write(uint32_t address, uint8_t value) {
 	
-	return 0;
+	/* ~ VRAM addresses are latched hi-lo. ~ */
+	
+	ppu_write_internal(PPUADDR, hi(address));
+	
+	ppu_write_internal(PPUADDR, lo(address));
+	
+	ppu_write_internal(PPUDATA, value);
+	
+}
+
+uint8_t ppu_read_internal(uint32_t address) {
+	
+	/* ~ Switch the direction of the data bus to inputs. ~ */
+	
+	DATAIN();
+	
+	/* ~ Output the address. ~ */
+	
+	AT91C_BASE_PIOA -> PIO_ODSR = ((uint32_t)(address) << 18) & ADDRMASK;
+	
+	/* ~ Switch the PPU into read mode. ~ */
+	
+	READ();
+	
+	/* ~ Assert the chip select pin to latch the data. ~ */
+	
+	LATCH();
+	
+	/* ~ Read the data. We must shift based on pinout. ~ */
+	
+	uint8_t data = ((AT91C_BASE_PIOA -> PIO_PDSR >> 23) | ((AT91C_BASE_PIOA -> PIO_PDSR & (1 << 15)) >> 15));
+	
+	/* ~ Deassert chip select pin to release the PPU. ~ */
+	
+	RELEASE();
+	
+	/* ~ Return the data. ~ */
+	
+	return data;
+	
+}
+
+uint8_t ppu_read(uint32_t address) {
+	
+	/* ~ VRAM addresses are latched hi-lo. ~ */
+	
+	ppu_write_internal(PPUADDR, hi(address));
+	
+	ppu_write_internal(PPUADDR, lo(address));
+	
+	ppu_read_internal(PPUDATA);
+	
+	return ppu_read_internal(PPUDATA);
 	
 }
 
 void ppu_dma(void *source) {
 	
-	AT91C_BASE_PIOA -> PIO_CODR |= (1 << PIN);
+	
 	
 }
