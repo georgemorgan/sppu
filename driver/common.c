@@ -14,7 +14,13 @@ const struct _ppu ppu = {
 	
 	ppu_load,
 	
+	ppu_write_internal,
+	
 	ppu_write,
+	
+	ppu_fill,
+	
+	ppu_read_internal,
 	
 	ppu_read,
 	

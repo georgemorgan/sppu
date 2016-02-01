@@ -10,7 +10,7 @@ void ppu_configure(void) {
 	
 	/* ~ Registers this module with the Flipper Message Runtime. Also calls the remote configure function. ~ */
 	
-	fmr.bind(&handle, fmr_bundle_id_from_string("io.flipper.ppu"));
+	fmr.bind(&handle, fmr_bundle_id_from_string("io.flipper.sppu"));
 	
 	/* ~ Ensure that we have sucessfully registered the module. ~ */
 	
@@ -20,11 +20,11 @@ void ppu_configure(void) {
 	
 }
 
-void ppu_load(uint32_t source, uint16_t length) {
+void ppu_load(uint16_t source, uint16_t length) {
 	
 	/* ~ Resolves the new address of the data by moving it into the device's memory. ~ */
 	
-	//uint32_t resolved = fmr.resolve(source, length);
+	//uint16_t resolved = fmr.resolve(source, length);
 	
 	/* e.g Failed to load PPU data. Reason: Not enough memory. */
 	
@@ -32,21 +32,37 @@ void ppu_load(uint32_t source, uint16_t length) {
 	
 	/* ~ Invokes the function on the device. ~ */
 	
-	uint32_t ret = fmr.invoke(handle, _ppu_load, 4, fmr_argument(source), fmr_argument(length));
+	uint16_t ret = fmr.invoke(handle, _ppu_load, 4, fmr_argument(source), fmr_argument(length));
 	
 }
 
-void ppu_write(uint32_t address, uint8_t value) {
+void ppu_write_internal(uint16_t address, uint8_t value) {
 	
-	printf("Writing!\n");
+	fmr.invoke(handle, _ppu_write_internal, 4, fmr_argument(address), fmr_argument(value));
+	
+}
+
+void ppu_write(uint16_t address, uint8_t value) {
 	
 	fmr.invoke(handle, _ppu_write, 4, fmr_argument(address), fmr_argument(value));
 	
 }
 
-uint8_t ppu_read(uint32_t address) {
+void ppu_fill(uint16_t address, uint8_t value, uint16_t n) {
 	
-	return 	fmr.invoke(handle, _ppu_read, 2, fmr_argument(address));
+	fmr.invoke(handle, _ppu_fill, 6, fmr_argument(address), fmr_argument(value), fmr_argument(n));
+	
+}
+
+uint8_t ppu_read_internal(uint16_t address) {
+	
+	return 	fmr.invoke(handle, _ppu_read_internal, 2, fmr_argument(address));
+	
+}
+
+uint8_t ppu_read(uint16_t address) {
+	
+	return fmr.invoke(handle, _ppu_read, 2, fmr_argument(address));
 	
 }
 

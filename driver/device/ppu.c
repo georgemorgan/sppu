@@ -41,9 +41,9 @@
 
 #define DATAMASK ((0xFE << 23) | (1 << 15))
 
-#define DATAIN() AT91C_BASE_PIOA -> PIO_ODR |= DATAMASK;
+#define DATAIN() AT91C_BASE_PIOA -> PIO_OER &= ~DATAMASK; AT91C_BASE_PIOA -> PIO_ODR |= DATAMASK;
 
-#define DATAOUT() AT91C_BASE_PIOA -> PIO_OER |= DATAMASK;
+#define DATAOUT() AT91C_BASE_PIOA -> PIO_ODR &= ~DATAMASK; AT91C_BASE_PIOA -> PIO_OER |= DATAMASK;
 
 #define ADDRMASK (7 << 18)
 
@@ -59,7 +59,10 @@
 
 #define RELEASE() AT91C_BASE_PIOA -> PIO_CODR &= ~CSMASK; AT91C_BASE_PIOA -> PIO_SODR |= CSMASK;
 
-void ppu_write_internal(uint32_t address, uint8_t value);
+
+extern uint8_t attribute[];
+
+extern uint8_t palette[];
 
 void ppu_configure(void) {
 	
@@ -68,10 +71,14 @@ void ppu_configure(void) {
 	AT91C_BASE_PIOA -> PIO_PER |= DATAMASK | ADDRMASK | RWMASK | CSMASK;
 	
 	/* ~ Configure the pins of the data bus, address bus, and direction as outputs. ~ */
+
+	AT91C_BASE_PIOA -> PIO_ODR &= ~(DATAMASK | ADDRMASK | RWMASK | CSMASK);
 	
 	AT91C_BASE_PIOA -> PIO_OER |= DATAMASK | ADDRMASK | RWMASK | CSMASK;
 	
 	/* ~ Enable single access writes to each pin. ~ */
+
+	AT91C_BASE_PIOA -> PIO_OWDR &= ~(DATAMASK | ADDRMASK);
 	
 	AT91C_BASE_PIOA -> PIO_OWER |= DATAMASK | ADDRMASK;
 	
@@ -81,29 +88,61 @@ void ppu_configure(void) {
 	
 	/* ~ Show background and sprites. ~ */
 	
-	ppu_write_internal(PPUMASK, 0x18);
+	ppu_write_internal(PPUMASK, 0xA);
 	
 }
 
-void ppu_load(uint32_t source, uint16_t length) {
+void ppu_load(uint16_t source, uint16_t length) {
 
-	ppu_write_internal(PPUADDR, hi(0x2000));
+	/* ~ Pause rendering to write to VRAM. ~ */
 	
-	ppu_write_internal(PPUADDR, lo(0x2000));
+	PAUSE();
 	
-//	for (int i = 0x2000; i < 0x4000; i ++) {
-//		
-//		ppu_write_internal(PPUSCROLL, (uint8_t)(i));
-//		
-//		ppu_write_internal(PPUDATA, (uint8_t)(i << length));
-//		
-//	}
+	/* ~ Reset the address latch. ~ */
+	
+	RESETLATCH();
+	
+	/* ~ Latch the address of the attribute tables, hi byte first. ~ */
+	
+	ppu_write_internal(PPUADDR, hi(ATTRIBUTEADDR));
+	
+	ppu_write_internal(PPUADDR, lo(ATTRIBUTEADDR));
+	
+	for (int i = 0; i < ATTRIBUTESIZE; i ++) {
+	
+		/* ~ Write the data to the attribute tables. ~ */
+		
+		ppu_write_internal(PPUDATA, i % 2);
+		
+	}
+	
+	/* ~ Reset the address latch. ~ */
+	
+	RESETLATCH();
+	
+	/* ~ Latch the address of the palettes, hi byte first. ~ */
+	
+	ppu_write_internal(PPUADDR, hi(PALETTEADDR));
+	
+	ppu_write_internal(PPUADDR, lo(PALETTEADDR));
+	
+	for (int i = 0; i < PALETTESIZE; i ++) {
+		
+		/* ~ Write the data to the palettes. ~ */
+		
+		ppu_write_internal(PPUDATA, i);
+		
+	}
+	
+	/* ~ Enable rendering. ~ */
+	
+	RENDER();
 	
 }
 
 /* ~ Sends data to the PPU's internal registers. ~ */
 
-void ppu_write_internal(uint32_t address, uint8_t value) {
+void ppu_write_internal(uint16_t address, uint8_t value) {
 	
 	/* ~ Switch the direction of the data bus to outputs. ~ */
 	
@@ -115,7 +154,7 @@ void ppu_write_internal(uint32_t address, uint8_t value) {
 	
 	/* ~ Write the address and data. ~ */
 	
-	AT91C_BASE_PIOA -> PIO_ODSR = (address << 18) | ((value << 23) | ((value & 1) << 15));
+	AT91C_BASE_PIOA -> PIO_ODSR = (address << 18) | (((value << 23) | ((value & 1) << 15)) & DATAMASK);
 	
 	/* ~ Assert the chip select pin to latch the data. ~ */
 	
@@ -129,7 +168,9 @@ void ppu_write_internal(uint32_t address, uint8_t value) {
 
 /* ~ Sends data to VRAM. ~ */
 
-void ppu_write(uint32_t address, uint8_t value) {
+void ppu_write(uint16_t address, uint8_t value) {
+	
+	RESETLATCH();
 	
 	/* ~ VRAM addresses are latched hi-lo. ~ */
 	
@@ -141,7 +182,29 @@ void ppu_write(uint32_t address, uint8_t value) {
 	
 }
 
-uint8_t ppu_read_internal(uint32_t address) {
+void ppu_fill(uint16_t address, uint8_t value, uint16_t n)
+{
+	PAUSE();
+	
+	ppu_write_internal(PPUMASK, ppu_read_internal(PPUCTRL) & 0xFB);
+	
+	RESETLATCH();
+	
+	/* ~ VRAM addresses are latched hi-lo. ~ */
+	
+	ppu_write_internal(PPUADDR, hi(address));
+	
+	ppu_write_internal(PPUADDR, lo(address));
+	
+	while (n--)
+	{
+		ppu_write_internal(PPUDATA, value);
+	}
+	
+	RENDER();
+}
+
+uint8_t ppu_read_internal(uint16_t address) {
 	
 	/* ~ Switch the direction of the data bus to inputs. ~ */
 	
@@ -149,7 +212,7 @@ uint8_t ppu_read_internal(uint32_t address) {
 	
 	/* ~ Output the address. ~ */
 	
-	AT91C_BASE_PIOA -> PIO_ODSR = ((uint32_t)(address) << 18) & ADDRMASK;
+	AT91C_BASE_PIOA -> PIO_ODSR = (address << 18) & ADDRMASK;
 	
 	/* ~ Switch the PPU into read mode. ~ */
 	
@@ -173,7 +236,9 @@ uint8_t ppu_read_internal(uint32_t address) {
 	
 }
 
-uint8_t ppu_read(uint32_t address) {
+uint8_t ppu_read(uint16_t address) {
+	
+	RESETLATCH();
 	
 	/* ~ VRAM addresses are latched hi-lo. ~ */
 	
