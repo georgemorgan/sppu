@@ -22,6 +22,8 @@ dump:
 
 load:
 
+	flipper unload
+
 	$(MAKE) -C driver/device load
 
 clean:

@@ -84,11 +84,11 @@ void ppu_configure(void) {
 	
 	/* ~ Increment VRAM address on write to PPUDATA. ~ */
 	
-	ppu_write_internal(PPUCTRL, 0x00);
+//	ppu_write_internal(PPUCTRL, 0x00);
 	
 	/* ~ Show background and sprites. ~ */
 	
-	ppu_write_internal(PPUMASK, 0xA);
+//	ppu_write_internal(PPUMASK, 0xA);
 	
 }
 
@@ -104,35 +104,35 @@ void ppu_load(uint16_t source, uint16_t length) {
 	
 	/* ~ Latch the address of the attribute tables, hi byte first. ~ */
 	
-	ppu_write_internal(PPUADDR, hi(ATTRIBUTEADDR));
+	ppu_write_internal(PPUADDR, hi(0x2000));
 	
-	ppu_write_internal(PPUADDR, lo(ATTRIBUTEADDR));
+	ppu_write_internal(PPUADDR, lo(0x2000));
 	
-	for (int i = 0; i < ATTRIBUTESIZE; i ++) {
+	for (int i = 0; i < 0x400; i ++) {
 	
 		/* ~ Write the data to the attribute tables. ~ */
 		
-		ppu_write_internal(PPUDATA, i % 2);
+		ppu_write_internal(PPUDATA, 0x2F);
 		
 	}
 	
 	/* ~ Reset the address latch. ~ */
 	
-	RESETLATCH();
-	
-	/* ~ Latch the address of the palettes, hi byte first. ~ */
-	
-	ppu_write_internal(PPUADDR, hi(PALETTEADDR));
-	
-	ppu_write_internal(PPUADDR, lo(PALETTEADDR));
-	
-	for (int i = 0; i < PALETTESIZE; i ++) {
-		
-		/* ~ Write the data to the palettes. ~ */
-		
-		ppu_write_internal(PPUDATA, i);
-		
-	}
+//	RESETLATCH();
+//	
+//	/* ~ Latch the address of the palettes, hi byte first. ~ */
+//	
+//	ppu_write_internal(PPUADDR, hi(PALETTEADDR));
+//	
+//	ppu_write_internal(PPUADDR, lo(PALETTEADDR));
+//	
+//	for (int i = 0; i < PALETTESIZE; i ++) {
+//		
+//		/* ~ Write the data to the palettes. ~ */
+//		
+//		ppu_write_internal(PPUDATA, i);
+//		
+//	}
 	
 	/* ~ Enable rendering. ~ */
 	
