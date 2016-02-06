@@ -8,8 +8,8 @@ SECTIONS {
 
 	. = ORIGIN(LOADABLE);
 
-	.fdl : { * (.start) * (.fdl); }
+	.fdl : { * (.fdl); }
 
-	.text : { * (.text .text.*); *(.ppumemory .ppumemory.*); }
+	.text : { *(.got .got.*); * (.text .text.*); *(.rodata .rodata.*); }
 
 }

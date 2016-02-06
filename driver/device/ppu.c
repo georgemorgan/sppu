@@ -59,10 +59,11 @@
 
 #define RELEASE() AT91C_BASE_PIOA -> PIO_CODR &= ~CSMASK; AT91C_BASE_PIOA -> PIO_SODR |= CSMASK;
 
+static const uint8_t pattern[];
 
-extern uint8_t attribute[];
+static const uint8_t attribute[];
 
-extern uint8_t palette[];
+static const uint8_t palette[];
 
 void ppu_configure(void) {
 	
@@ -92,8 +93,28 @@ void ppu_configure(void) {
 	
 }
 
-void ppu_load(uint16_t source, uint16_t length) {
+void usart_put_byte(AT91S_USART *usart, uint8_t byte) {
+	
+	/* ~ Wait until the USART is ready to transmit. ~ */
+	
+	while (!(usart -> US_CSR & AT91C_US_TXRDY));
+	
+	/* ~ Send the byte. ~ */
+	
+	usart -> US_THR = byte;
+	
+}
 
+void usart_push(AT91S_USART *usart, void *source, size_t length) {
+	
+	/* ~ THIS SHOULD BE OPTIMIZED TO USE THE DMAC. ~ */
+	
+	while (length --) usart_put_byte(usart, *(uint8_t *)(source ++));
+	
+}
+
+void ppu_load(uint16_t source, uint16_t length) {
+	
 	/* ~ Pause rendering to write to VRAM. ~ */
 	
 	PAUSE();
@@ -102,37 +123,55 @@ void ppu_load(uint16_t source, uint16_t length) {
 	
 	RESETLATCH();
 	
-	/* ~ Latch the address of the attribute tables, hi byte first. ~ */
+	/* ~ Latch the address of the pattern tables, hi byte first. ~ */
 	
-	ppu_write_internal(PPUADDR, hi(0x2000));
+	ppu_write_internal(PPUADDR, hi(0x0000));
 	
-	ppu_write_internal(PPUADDR, lo(0x2000));
+	ppu_write_internal(PPUADDR, lo(0x0000));
 	
-	for (int i = 0; i < 0x400; i ++) {
-	
-		/* ~ Write the data to the attribute tables. ~ */
+	for (int i = 0; i < 0x2000; i ++) {
 		
-		ppu_write_internal(PPUDATA, 0x2F);
+		/* ~ Write the data to the pattern table VRAM. ~ */
+		
+		ppu_write_internal(PPUDATA, pattern[i]);
 		
 	}
 	
 	/* ~ Reset the address latch. ~ */
 	
-//	RESETLATCH();
-//	
-//	/* ~ Latch the address of the palettes, hi byte first. ~ */
-//	
-//	ppu_write_internal(PPUADDR, hi(PALETTEADDR));
-//	
-//	ppu_write_internal(PPUADDR, lo(PALETTEADDR));
-//	
-//	for (int i = 0; i < PALETTESIZE; i ++) {
-//		
-//		/* ~ Write the data to the palettes. ~ */
-//		
-//		ppu_write_internal(PPUDATA, i);
-//		
-//	}
+	RESETLATCH();
+	
+	/* ~ Latch the address of the name tables, hi byte first. ~ */
+	
+	ppu_write_internal(PPUADDR, hi(0x2000));
+	
+	ppu_write_internal(PPUADDR, lo(0x2000));
+	
+	for (int i = 0; i < 0x1000; i ++) {
+		
+		/* ~ Write the data to the name table. ~ */
+		
+		ppu_write_internal(PPUDATA, attribute[i]);
+		
+	}
+	
+	/* ~ Reset the address latch. ~ */
+	
+	RESETLATCH();
+	
+	/* ~ Latch the address of the name tables, hi byte first. ~ */
+	
+	ppu_write_internal(PPUADDR, hi(0x3F00));
+	
+	ppu_write_internal(PPUADDR, lo(0x3F00));
+	
+	for (int i = 0; i < 0x20; i ++) {
+		
+		/* ~ Write the data to the name table. ~ */
+		
+		ppu_write_internal(PPUDATA, palette[i]);
+		
+	}
 	
 	/* ~ Enable rendering. ~ */
 	

@@ -1,4 +1,8 @@
-.section .ppumemory
+.global pattern
+
+pattern:
+
+.incbin "pattern.ppu"
 
 .global attribute
 
