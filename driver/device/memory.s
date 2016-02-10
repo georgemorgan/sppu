@@ -1,17 +1,21 @@
-.global pattern
+//.global pattern
+//
+//pattern:
+//
+//.incbin "pattern.ppu"
 
-pattern:
+program:
 
-.incbin "pattern.ppu"
+.incbin "program.cpu"
 
-.global attribute
-
-attribute:
-
-.incbin "attribute.ppu"
-
-.global palette
-
-palette:
-
-.incbin "palette.ppu"
+//.global attribute
+//
+//attribute:
+//
+//.incbin "attribute.ppu"
+//
+//.global palette
+//
+//palette:
+//
+//.incbin "palette.ppu"

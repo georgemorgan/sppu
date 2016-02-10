@@ -59,11 +59,11 @@
 
 #define RELEASE() AT91C_BASE_PIOA -> PIO_CODR &= ~CSMASK; AT91C_BASE_PIOA -> PIO_SODR |= CSMASK;
 
-static const uint8_t pattern[];
-
-static const uint8_t attribute[];
-
-static const uint8_t palette[];
+//static const uint8_t pattern[];
+//
+//static const uint8_t attribute[];
+//
+//static const uint8_t palette[];
 
 void ppu_configure(void) {
 	
@@ -82,14 +82,6 @@ void ppu_configure(void) {
 	AT91C_BASE_PIOA -> PIO_OWDR &= ~(DATAMASK | ADDRMASK);
 	
 	AT91C_BASE_PIOA -> PIO_OWER |= DATAMASK | ADDRMASK;
-	
-	/* ~ Increment VRAM address on write to PPUDATA. ~ */
-	
-//	ppu_write_internal(PPUCTRL, 0x00);
-	
-	/* ~ Show background and sprites. ~ */
-	
-//	ppu_write_internal(PPUMASK, 0xA);
 	
 }
 
@@ -133,43 +125,7 @@ void ppu_load(uint16_t source, uint16_t length) {
 		
 		/* ~ Write the data to the pattern table VRAM. ~ */
 		
-		ppu_write_internal(PPUDATA, pattern[i]);
-		
-	}
-	
-	/* ~ Reset the address latch. ~ */
-	
-	RESETLATCH();
-	
-	/* ~ Latch the address of the name tables, hi byte first. ~ */
-	
-	ppu_write_internal(PPUADDR, hi(0x2000));
-	
-	ppu_write_internal(PPUADDR, lo(0x2000));
-	
-	for (int i = 0; i < 0x1000; i ++) {
-		
-		/* ~ Write the data to the name table. ~ */
-		
-		ppu_write_internal(PPUDATA, attribute[i]);
-		
-	}
-	
-	/* ~ Reset the address latch. ~ */
-	
-	RESETLATCH();
-	
-	/* ~ Latch the address of the name tables, hi byte first. ~ */
-	
-	ppu_write_internal(PPUADDR, hi(0x3F00));
-	
-	ppu_write_internal(PPUADDR, lo(0x3F00));
-	
-	for (int i = 0; i < 0x20; i ++) {
-		
-		/* ~ Write the data to the name table. ~ */
-		
-		ppu_write_internal(PPUDATA, palette[i]);
+		// ppu_write_internal(PPUDATA, pattern[i]);
 		
 	}
 	

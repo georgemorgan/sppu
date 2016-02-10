@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Workspace
+   version = "1.0">
+   <FileRef
+      location = "container:sppu.c">
+   </FileRef>
+   <FileRef
+      location = "container:sppu.h">
+   </FileRef>
+   <Group
+      location = "group:../../Desktop/sppu/driver"
+      name = "driver">
+      <FileRef
+         location = "group:common.c">
+      </FileRef>
+      <FileRef
+         location = "group:ppu.c">
+      </FileRef>
+      <FileRef
+         location = "group:ppu.h">
+      </FileRef>
+      <Group
+         location = "group:device"
+         name = "device">
+         <FileRef
+            location = "group:makefile">
+         </FileRef>
+         <FileRef
+            location = "group:atmel.h">
+         </FileRef>
+         <FileRef
+            location = "group:dl.ld">
+         </FileRef>
+         <FileRef
+            location = "group:memory.s">
+         </FileRef>
+         <Group
+            location = "group:ppu"
+            name = "ppu">
+            <FileRef
+               location = "group:attribute.ppu">
+            </FileRef>
+            <FileRef
+               location = "group:palette.ppu">
+            </FileRef>
+            <FileRef
+               location = "group:pattern.ppu">
+            </FileRef>
+            <FileRef
+               location = "group:ppu.c">
+            </FileRef>
+         </Group>
+         <Group
+            location = "group:cpu"
+            name = "cpu">
+            <FileRef
+               location = "group:cpu.elf">
+            </FileRef>
+            <FileRef
+               location = "group:cpu.h">
+            </FileRef>
+            <FileRef
+               location = "group:io.c">
+            </FileRef>
+            <Group
+               location = "group:m6502"
+               name = "m6502">
+               <FileRef
+                  location = "group:Codes.h">
+               </FileRef>
+               <FileRef
+                  location = "group:M6502.c">
+               </FileRef>
+               <FileRef
+                  location = "group:M6502.h">
+               </FileRef>
+               <FileRef
+                  location = "group:Tables.h">
+               </FileRef>
+            </Group>
+            <FileRef
+               location = "group:main.c">
+            </FileRef>
+            <FileRef
+               location = "group:program.cpu">
+            </FileRef>
+            <FileRef
+               location = "group:thumb.s">
+            </FileRef>
+         </Group>
+      </Group>
+   </Group>
+</Workspace>

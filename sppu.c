@@ -102,6 +102,17 @@ int main(int argc, char *argv[]) {
 		
 	}
 
+	
+	if (!strcmp(argv[1], "background")) {
+		
+		PAUSE();
+		
+		ppu.write(0x3F00, atoi(argv[2]));
+		
+		RENDER();
+		
+	}
+	
 	if (!strcmp(argv[1], "seltables")) {
 		
 		/* ~ Select the name table. ~ */
