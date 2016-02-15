@@ -1,10 +1,22 @@
-flags = -std=c99 -Os -mcpu=arm7tdmi -mfloat-abi=soft -nostdlib -ffreestanding -fomit-frame-pointer -fpic -DEXEC6502
+cflags = -std=c99 -Os -mcpu=arm7tdmi -mthumb -mthumb-interwork -mfloat-abi=soft -nostdlib -ffreestanding -fomit-frame-pointer -fpic
+
+flags = $(cflags) -D__device_compilation__ -DLSB_FIRST -DEXEC6502
+
+targets = ppu/*.c ../common.c memory.s cpu/*.c cpu/M6502/*.c -I cpu/M6502 cpu/thumb.s
+
+includes = -I .. -I . -I /usr/local/include -I /usr/local/include/flipper
 
 all:
-	
-	arm-elf-gcc-4.7 $(flags) -D__device_compilation__ -c ppu.c ../common.c memory.s cpu/*.c cpu/thumb.s -I .. -I /usr/local/include -I /usr/local/include/flipper
 
-	arm-elf-gcc-4.7 -fpic -nostdlib -ffreestanding -Wl,-T dl.ld *.o -o ppu.elf
+	# ~ Compile individual targets. ~ #
+
+	arm-elf-gcc-4.7 $(flags) -c $(targets) $(includes)
+
+	# ~ Link objects. ~ * #
+
+	arm-elf-gcc-4.7 $(cflags) -Wl,-T dl.ld *.o -o ppu.elf
+
+	# ~ Dump loadable. ~ #
 
 	arm-elf-objcopy -O binary ppu.elf ppu.bin
 

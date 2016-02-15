@@ -22,18 +22,6 @@
       <Group
          location = "group:device"
          name = "device">
-         <FileRef
-            location = "group:makefile">
-         </FileRef>
-         <FileRef
-            location = "group:atmel.h">
-         </FileRef>
-         <FileRef
-            location = "group:dl.ld">
-         </FileRef>
-         <FileRef
-            location = "group:memory.s">
-         </FileRef>
          <Group
             location = "group:ppu"
             name = "ppu">
@@ -53,18 +41,9 @@
          <Group
             location = "group:cpu"
             name = "cpu">
-            <FileRef
-               location = "group:cpu.elf">
-            </FileRef>
-            <FileRef
-               location = "group:cpu.h">
-            </FileRef>
-            <FileRef
-               location = "group:io.c">
-            </FileRef>
             <Group
-               location = "group:m6502"
-               name = "m6502">
+               location = "group:M6502"
+               name = "M6502">
                <FileRef
                   location = "group:Codes.h">
                </FileRef>
@@ -79,15 +58,33 @@
                </FileRef>
             </Group>
             <FileRef
+               location = "group:cpu.h">
+            </FileRef>
+            <FileRef
+               location = "group:io.c">
+            </FileRef>
+            <FileRef
                location = "group:main.c">
             </FileRef>
             <FileRef
-               location = "group:program.cpu">
+               location = "group:mario.nes">
             </FileRef>
             <FileRef
                location = "group:thumb.s">
             </FileRef>
          </Group>
+         <FileRef
+            location = "group:atmel.h">
+         </FileRef>
+         <FileRef
+            location = "group:dl.ld">
+         </FileRef>
+         <FileRef
+            location = "group:makefile">
+         </FileRef>
+         <FileRef
+            location = "group:memory.s">
+         </FileRef>
       </Group>
    </Group>
 </Workspace>

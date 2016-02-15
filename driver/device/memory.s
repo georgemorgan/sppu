@@ -3,11 +3,11 @@
 //pattern:
 //
 //.incbin "pattern.ppu"
-
-program:
-
-.incbin "program.cpu"
-
+//
+//program:
+//
+//.incbin "program.cpu"
+//
 //.global attribute
 //
 //attribute:
