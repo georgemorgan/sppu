@@ -1,9 +1,9 @@
 #define __private_include__
 #include <ppu.h>
 #include "atmel.h"
-#include <at45/at45.h>
-#include <fs/fs.h>
-#include <spi/spi.h>
+#include <flipper/at45.h>
+#include <flipper/fs.h>
+#include <flipper/spi.h>
 #include <cpu/cpu.h>
 
 /*
@@ -38,7 +38,7 @@
  *
  * PA19 (A2) May be used to generate a Fast Interrupt Request for servicing by the CPU.
  *    -> This will be implemented to draw contiguous frame buffers to the screen during V-BLANK.
- *
+ * 
  */
 
 #define DATAMASK ((0xFE << 23) | (1 << 15))
@@ -183,7 +183,7 @@ int8_t ppu_emulate(char *rom) {
 
 	/* ~ Load the ROM from the filesystem assuming that the 'rom' parameter is the key. ~ */
 	fsp _base = fs.data(rom);
-	if (!data) { error.raise(_error_file_not_found); return -1; }
+	if (!_base) { error.raise(E_FS_NO_LEAF, ""); return -1; }
 
 	/* ~ Use the base address of the ROM to calcuate the address of the PRG-ROM in the filesystem. ~ */
 	/* ~ (_base + sizeof(iNES_HEADER)) ~ */

@@ -39,9 +39,9 @@ int8_t ppu_emulate(char *rom) {
 	uint16_t key = checksum(rom, strlen(rom));
 
 	/* ~ Launch the emulator. ~	*/
-	int8_t err = fmr.invoke(_ppu, _ppu_emulate, fmr_args(key));
-	if (err == -1) { error.handle(); }
+	int8_t response = fmr.invoke(_ppu, _ppu_emulate, fmr_args(key));
+	if (response < 0) { error.raise(E_UNIMPLEMENTED, ""); }
 
-	return err;
+	return response;
 
 }

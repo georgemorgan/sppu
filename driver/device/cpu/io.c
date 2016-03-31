@@ -1,6 +1,8 @@
 #include "cpu.h"
 #define __private_include__
 #include <ppu.h>
+#include <flipper/at45.h>
+#include <flipper/spi.h>
 
 /* ~ Allocate space in the .data section for the NES' RAM. ~ */
 static uint8_t ram[NES_RAM_SIZE];

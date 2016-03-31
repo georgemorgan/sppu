@@ -155,7 +155,7 @@ void sppu_emulate(OPERATION_PARAMETERS) {
 	printf("Transferring iNES ROM '%s'.\n\n", argv[0]);
 
 	/* ~ Upload the ROM to the device's filesystem. ~ */
-	fs.upload(argv[0]);
+	//fs.upload(argv[0]);
 
 	/* ~ Launch the emulator with the given ROM. ~ */
 	ppu.emulate(argv[0]);

@@ -1,9 +1,9 @@
 #ifndef __sppu_h__
 #define __sppu_h__
 
-#include <flipper/types.h>
-#include <error/error.h>
-#include <fmr/fmr.h>
+#include <flipper/core.h>
+#include <flipper/error.h>
+#include <flipper/fmr.h>
 
 /* ~ PPU internal addresses. ~ */
 #define PPUCTRL 0x00

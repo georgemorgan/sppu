@@ -9,10 +9,10 @@ includes = -I .. -I . -I /usr/local/include -I /usr/local/include/flipper -I cpu
 all:
 
 	# ~ Compile individual targets. ~ #
-	arm-elf-gcc-4.7 $(flags) $(includes) -c $(targets)
+	arm-elf-gcc $(flags) $(includes) -c $(targets)
 
 	# ~ Link objects. ~ * #
-	arm-elf-gcc-4.7 $(cflags) -Wl,-T ppu.ld *.o -o ppu.elf
+	arm-elf-gcc $(cflags) -Wl,-T ppu.ld *.o -o ppu.elf
 
 	# ~ Dump loadable. ~ #
 	arm-elf-objcopy -O binary ppu.elf ppu.bin

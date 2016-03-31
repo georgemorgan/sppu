@@ -7,7 +7,7 @@
 #include <stdlib.h>
 
 /* ~ Include all of the types exposed by the Flipper Toolbox. ~ */
-#include <flipper/types.h>
+#include <flipper/core.h>
 
 /* ~ Define macros for miscelaneous constants. ~ */
 #define NES_RAM_SIZE 0x800

@@ -25,7 +25,7 @@
 
 /* ~ Include the Flipper header and PPU driver with private definitions. ~ */
 #define __private_include__
-#include <flipper/flipper.h>
+#include <flipper.h>
 #include <ppu.h>
 
 #define OPERATION_PARAMETERS int argc, char *argv[]

@@ -2,9 +2,9 @@
 
 cc = gcc
 
-targets = sppu.c $(shell find driver -path driver/device -prune -o -name '*.c' -print) 
+targets = sppu.c $(shell find driver -path driver/device -prune -o -name '*.c' -print)
 
-includes = driver/ $(FLIPPERSDK)/include
+includes = driver /usr/local/include
 
 libraries = flipper
 
@@ -12,7 +12,7 @@ output = sppu
 
 all:
 
-	$(cc) -Os -std=gnu99 $(foreach dir,$(includes),-I $(dir)) $(foreach library, $(libraries),-l$(library)) $(targets) -o $(output)
+	$(cc) -Os -std=gnu99 $(foreach dir,$(includes),-I $(dir)) -L /usr/local/lib -lflipper $(targets) -o $(output)
 
 	$(MAKE) -C driver/device
 
