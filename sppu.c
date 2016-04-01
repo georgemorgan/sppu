@@ -7,6 +7,7 @@
 */
 
 #include "sppu.h"
+#include <libgen.h>
 
 struct _operation commands[] = {
 	{ "help", "Displays this help message.", sppu_help },
@@ -33,12 +34,12 @@ int main(int argc, char *argv[]) {
 		return 0;
 	}
 
-//	/* ~ Attatch a Flipper device. ~ */
-//	flipper.attach(FLIPPER_SOURCE_USB);
-//
-//	/* ~ Initialize the PPU module. ~ */
-//	ppu.configure();
-//
+	/* ~ Attatch a Flipper device. ~ */
+	flipper.attach();
+
+	/* ~ Initialize the PPU module. ~ */
+	ppu.configure();
+
 //	if (!strcmp(argv[1], "clear")) {
 //		ppu.load(0, 0);
 //	}
@@ -155,9 +156,10 @@ void sppu_emulate(OPERATION_PARAMETERS) {
 	printf("Transferring iNES ROM '%s'.\n\n", argv[0]);
 
 	/* ~ Upload the ROM to the device's filesystem. ~ */
-	//fs.upload(argv[0]);
+	char *name = basename(argv[0]);
+	fs.upload(argv[0], name);
 
 	/* ~ Launch the emulator with the given ROM. ~ */
-	ppu.emulate(argv[0]);
+	ppu.emulate(name);
 
 }

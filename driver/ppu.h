@@ -1,19 +1,20 @@
 #ifndef __sppu_h__
 #define __sppu_h__
 
+/* ~ Include core Flipper headers. ~ */
 #include <flipper/core.h>
 #include <flipper/error.h>
 #include <flipper/fmr.h>
 
-/* ~ PPU internal addresses. ~ */
-#define PPUCTRL 0x00
-#define PPUMASK 0x01
+/* ~ Define the internal register addresses of the PPU. ~ */
+#define PPUCTRL   0x00
+#define PPUMASK   0x01
 #define PPUSTATUS 0x02
-#define OAMADDR 0x03
-#define OAMDATA 0x04
+#define OAMADDR   0x03
+#define OAMDATA   0x04
 #define PPUSCROLL 0x05
-#define PPUADDR 0x06
-#define PPUDATA 0x07
+#define PPUADDR   0x06
+#define PPUDATA   0x07
 
 /* ~ Miscelaneous NES constants. ~ */
 #define NES_PATTERN_TABLE_SIZE (2 * 1024)

@@ -57,10 +57,10 @@
 
 void ppu_configure(void) {
 
-	/* ~ Enable the pins of the data bus, address bus, and direction. ~ */
+	/* ~ Enable the RW and CS pins as well as the pins of the data and address busses. ~ */
 	AT91C_BASE_PIOA -> PIO_PER |= DATAMASK | ADDRMASK | RWMASK | CSMASK;
 
-	/* ~ Configure the pins of the data bus, address bus, and direction as outputs. ~ */
+	/* ~ Configure the RW and CS pins as well as the pins of the data and address busses. ~ */
 	AT91C_BASE_PIOA -> PIO_ODR &= ~(DATAMASK | ADDRMASK | RWMASK | CSMASK);
 	AT91C_BASE_PIOA -> PIO_OER |= DATAMASK | ADDRMASK | RWMASK | CSMASK;
 
@@ -108,7 +108,7 @@ void ppu_load(uint16_t source, uint16_t length) {
 /* ~ Writes data into the desired internal register of the PPU. ~ */
 void ppu_write_internal(uint16_t address, uint8_t value) {
 
-	/* ~ Switch the direction of the data bus to outputs. ~ */
+	/* ~ Switch the direction of the data bus to output. ~ */
 	DATAOUT();
 
 	/* ~ Switch the PPU into write mode. ~ */
@@ -128,17 +128,22 @@ void ppu_write_internal(uint16_t address, uint8_t value) {
 /* ~ Writes data into VRAM at a specified address. ~ */
 void ppu_write(uint16_t address, uint8_t value) {
 
+	/* ~ Reset the address latch. ~ */
 	RESETLATCH();
+
+	/* ~ Latch the address. ~ */
 	ppu_write_internal(PPUADDR, hi(address));
 	ppu_write_internal(PPUADDR, lo(address));
+
+	/* ~ Write the desired byte into video RAM. ~ */
 	ppu_write_internal(PPUDATA, value);
 
 }
 
-/* ~ Reads in a value from a register internal to the PPU. ~ */
+/* ~ Reads and returns a value from a register internal to the PPU. ~ */
 uint8_t ppu_read_internal(uint16_t address) {
 
-	/* ~ Switch the direction of the data bus to inputs. ~ */
+	/* ~ Switch the direction of the data bus to input. ~ */
 	DATAIN();
 
 	/* ~ Output the address. ~ */
@@ -161,14 +166,20 @@ uint8_t ppu_read_internal(uint16_t address) {
 
 }
 
-/* ~ Reads in a value from VRAM at a specified address. ~ */
+/* ~ Reads and returns a byte from video RAM at the address specified. ~ */
 uint8_t ppu_read(uint16_t address) {
 
+	/* ~ Reset the address latch. ~ */
 	RESETLATCH();
+
+	/* ~ Latch the address. ~ */
 	ppu_write_internal(PPUADDR, hi(address));
 	ppu_write_internal(PPUADDR, lo(address));
+
+	/* ~ Read a dummy byte from video RAM. ~ */
 	ppu_read_internal(PPUDATA);
 
+	/* ~ Read and return the desired byte from video RAM. ~ */
 	return ppu_read_internal(PPUDATA);
 
 }
@@ -178,35 +189,37 @@ void ppu_dma(void *source) {
 
 }
 
-/* ~ Loads the pattern tables in from the filesystem and launches an NES emulator. ~ */
+/* ~ Loads the pattern tables in from the filesystem and launches the NES emulator. ~ */
 int8_t ppu_emulate(char *rom) {
 
-	/* ~ Load the ROM from the filesystem assuming that the 'rom' parameter is the key. ~ */
+	/* ~ Obtain the base address of the iNES ROM from external memory. ~ */
 	fsp _base = fs.data(rom);
+
+	/* ~ Verify that the ROM was opened succesfully. ~ */
 	if (!_base) { error.raise(E_FS_NO_LEAF, ""); return -1; }
 
-	/* ~ Use the base address of the ROM to calcuate the address of the PRG-ROM in the filesystem. ~ */
-	/* ~ (_base + sizeof(iNES_HEADER)) ~ */
+	/* ~ Use the base address of the iNES ROM to calcuate the address of the PRG-ROM in external memory. ~ */
 	_prg_rom = _base + 16;
 
-	/* ~ Use the base address of the PRG-ROM to calculate the address of the pattern tables in the filesytem. ~ */
-	/* ~ (_prg_rom + sizeof(PRG_ROM)) ~ */
+	/* ~ Use the base address of the PRG-ROM to calculate the address of the pattern tables in external memory. ~ */
 	fsp pattern = _prg_rom + (2 * 16 * 1024);
 
-	/* ~ Open a continuous read from flash to pull in the pattern tables. ~ */
+	/* ~ Begin a continuous read from external memory to pull in each byte of the pattern tables. ~ */
 	at45.read(pattern);
 
-	/* ~ Latch the address of the pattern tables to begin DMA. ~ */
+	/* ~ Reset the internal address latch. ~ */
 	RESETLATCH();
+
+	/* ~ Latch the address of the pattern tables to begin DMA. ~ */
 	ppu_write_internal(PPUADDR, 0x0000);
 	ppu_write_internal(PPUADDR, 0x0000);
 
-	/* ~ Transfer the pattern tables from the filesystem into the PPU. ~ */
+	/* ~ Transfer the pattern tables from the filesystem into the video RAM. ~ */
 	for (int i = 0; i < NES_PATTERN_TABLE_SIZE; i ++) {
 		ppu_write_internal(PPUDATA, spi.get());
 	}
 
-	/* ~ Finish the continuous read. ~ */
+	/* ~ End the continuous read we began earlier. ~ */
 	at45.disable();
 
 }
