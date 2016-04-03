@@ -20,9 +20,9 @@ dump:
 
 	$(MAKE) -C driver/device dump
 
-load:
+install:
 
-	$(MAKE) -C driver/device load
+	$(MAKE) -C driver/device install
 
 clean:
 

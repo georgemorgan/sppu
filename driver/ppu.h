@@ -21,7 +21,7 @@
 
 /* ~ Macros. ~ */
 #define RESETLATCH() ppu_read_internal(PPUSTATUS);
-#define RENDER() ppu_write_internal(PPUMASK, 0x18);
+#define RENDER() ppu_write_internal(PPUMASK, 0xA);
 #define PAUSE() ppu_write_internal(PPUMASK, 0x00);
 
 /* ~ Attribute memory and palettes. ~ */

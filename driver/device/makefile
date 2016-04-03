@@ -2,7 +2,7 @@ cflags = -std=c99 -Os -mcpu=arm7tdmi -mthumb -mthumb-interwork -mfloat-abi=soft 
 
 flags = $(cflags) -D__device_compilation__ -DLSB_FIRST -DEXEC6502
 
-targets = *.c ../common.c cpu/*.c cpu/*.s cpu/M6502/*.c
+targets = *.c ../common.c memory.s # cpu/*.c cpu/*.s cpu/M6502/*.c
 
 includes = -I .. -I . -I /usr/local/include -I /usr/local/include/flipper -I cpu/M6502
 
@@ -21,9 +21,9 @@ dump:
 
 	arm-elf-objdump -D ppu.elf
 
-load:
+install:
 
-	flipper load io.flipper.sppu ppu.bin
+	flipper install io.flipper.sppu ppu.bin
 
 clean:
 

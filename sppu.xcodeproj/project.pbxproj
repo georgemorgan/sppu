@@ -54,6 +54,7 @@
 		5EB2B83E1CAC971C00D0A847 /* sppu.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = sppu.c; sourceTree = "<group>"; };
 		5EB2B83F1CAC971C00D0A847 /* sppu.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sppu.h; sourceTree = "<group>"; };
 		5EB2B8581CACB4E200D0A847 /* glue.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = glue.c; sourceTree = "<group>"; };
+		5EB383E41CB1A70E004E41D5 /* memory.s */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.asm; path = memory.s; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -106,6 +107,7 @@
 				5EB2B8381CAC971C00D0A847 /* makefile */,
 				5EB2B8391CAC971C00D0A847 /* ppu.c */,
 				5EB2B83A1CAC971C00D0A847 /* ppu.ld */,
+				5EB383E41CB1A70E004E41D5 /* memory.s */,
 			);
 			path = device;
 			sourceTree = "<group>";
@@ -378,6 +380,7 @@
 				5EB2B84D1CAC974100D0A847 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

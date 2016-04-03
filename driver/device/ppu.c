@@ -55,6 +55,12 @@
 #define LATCH() AT91C_BASE_PIOA -> PIO_SODR &= ~CSMASK; AT91C_BASE_PIOA -> PIO_CODR |= CSMASK;
 #define RELEASE() AT91C_BASE_PIOA -> PIO_CODR &= ~CSMASK; AT91C_BASE_PIOA -> PIO_SODR |= CSMASK;
 
+static const uint8_t pattern[];
+static const uint8_t attribute[];
+static const uint8_t palette[];
+
+void usart_put_byte(AT91S_USART *usart, uint8_t byte);
+
 void ppu_configure(void) {
 
 	/* ~ Enable the RW and CS pins as well as the pins of the data and address busses. ~ */
@@ -98,9 +104,42 @@ void ppu_load(uint16_t source, uint16_t length) {
 	ppu_write_internal(PPUADDR, hi(0x0000));
 	ppu_write_internal(PPUADDR, lo(0x0000));
 
-	/* ~ TODO ~ */
+	for (int i = 0; i < 0x2000; i ++) {
+		
+		/* ~ Write the data to the pattern table VRAM. ~ */
+		ppu_write_internal(PPUDATA, pattern[i]);
 
-	/* ~ Enable rendering. ~ */
+	}
+
+	/* ~ Reset the address latch. ~ */
+	RESETLATCH();
+
+	/* ~ Latch the address of the name tables, hi byte first. ~ */
+	ppu_write_internal(PPUADDR, hi(0x2000));
+	ppu_write_internal(PPUADDR, lo(0x2000));
+
+	for (int i = 0; i < 0x1000; i ++) {
+
+		/* ~ Write the data to the name table. ~ */
+		ppu_write_internal(PPUDATA, attribute[i]);
+
+	}
+
+	/* ~ Reset the address latch. ~ */
+	RESETLATCH();
+
+	/* ~ Latch the address of the name tables, hi byte first. ~ */
+	ppu_write_internal(PPUADDR, hi(0x3F00));
+	ppu_write_internal(PPUADDR, lo(0x3F00));
+
+	for (int i = 0; i < 0x20; i ++) {
+
+		/* ~ Write the data to the name table. ~ */
+		ppu_write_internal(PPUDATA, palette[i]);
+
+	}
+
+	/* ~ Begin rendering. ~ */
 	RENDER();
 
 }
@@ -192,34 +231,34 @@ void ppu_dma(void *source) {
 /* ~ Loads the pattern tables in from the filesystem and launches the NES emulator. ~ */
 int8_t ppu_emulate(char *rom) {
 
-	/* ~ Obtain the base address of the iNES ROM from external memory. ~ */
-	fsp _base = fs.data(rom);
-
-	/* ~ Verify that the ROM was opened succesfully. ~ */
-	if (!_base) { error.raise(E_FS_NO_LEAF, ""); return -1; }
-
-	/* ~ Use the base address of the iNES ROM to calcuate the address of the PRG-ROM in external memory. ~ */
-	_prg_rom = _base + 16;
-
-	/* ~ Use the base address of the PRG-ROM to calculate the address of the pattern tables in external memory. ~ */
-	fsp pattern = _prg_rom + (2 * 16 * 1024);
-
-	/* ~ Begin a continuous read from external memory to pull in each byte of the pattern tables. ~ */
-	at45.read(pattern);
-
-	/* ~ Reset the internal address latch. ~ */
-	RESETLATCH();
-
-	/* ~ Latch the address of the pattern tables to begin DMA. ~ */
-	ppu_write_internal(PPUADDR, 0x0000);
-	ppu_write_internal(PPUADDR, 0x0000);
-
-	/* ~ Transfer the pattern tables from the filesystem into the video RAM. ~ */
-	for (int i = 0; i < NES_PATTERN_TABLE_SIZE; i ++) {
-		ppu_write_internal(PPUDATA, spi.get());
-	}
-
-	/* ~ End the continuous read we began earlier. ~ */
-	at45.disable();
+//	/* ~ Obtain the base address of the iNES ROM from external memory. ~ */
+//	fsp _base = fs.data(rom);
+//
+//	/* ~ Verify that the ROM was opened succesfully. ~ */
+//	if (!_base) { error.raise(E_FS_NO_LEAF, ""); return -1; }
+//
+//	/* ~ Use the base address of the iNES ROM to calcuate the address of the PRG-ROM in external memory. ~ */
+//	_prg_rom = _base + 16;
+//
+//	/* ~ Use the base address of the PRG-ROM to calculate the address of the pattern tables in external memory. ~ */
+//	fsp pattern = _prg_rom + (2 * 16 * 1024);
+//
+//	/* ~ Begin a continuous read from external memory to pull in each byte of the pattern tables. ~ */
+//	at45.read(pattern);
+//
+//	/* ~ Reset the internal address latch. ~ */
+//	RESETLATCH();
+//
+//	/* ~ Latch the address of the pattern tables to begin DMA. ~ */
+//	ppu_write_internal(PPUADDR, 0x0000);
+//	ppu_write_internal(PPUADDR, 0x0000);
+//
+//	/* ~ Transfer the pattern tables from the filesystem into the video RAM. ~ */
+//	for (int i = 0; i < NES_PATTERN_TABLE_SIZE; i ++) {
+//		ppu_write_internal(PPUDATA, spi.get());
+//	}
+//
+//	/* ~ End the continuous read we began earlier. ~ */
+//	at45.disable();
 
 }

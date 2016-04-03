@@ -12,6 +12,8 @@ void ppu_configure(void) {
 
 void ppu_load(uint16_t source, uint16_t length) {
 
+	fmr.invoke(_ppu, _ppu_load, NO_ARGS);
+
 }
 
 void ppu_write_internal(uint16_t address, uint8_t value) {
