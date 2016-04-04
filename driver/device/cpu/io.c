@@ -46,18 +46,21 @@ void nes_cpu_write_io(uint16_t address, uint8_t value) {
 }
 
 /* ~ Create a variable that can be used to keep track of the previous program counter. ~ */
-uint16_t _pc;
+uint16_t previous_pc;
 
 uint8_t nes_cpu_read_rom(uint16_t address) {
 
 	/* ~ If the current address isn't the last address incremented, then a branch was performed. ~ */
-	if (address != ++ _pc) {
+	if (address != ++ previous_pc) {
+
 		/* ~ Begin a new continuous read. ~ */
 		at45.read(_prg_rom + address);
-		_pc = address;
+
+		previous_pc = address;
+
 	}
 
-	return spi.get();
+	return at45.get();
 
 }
 

@@ -43,7 +43,6 @@
 		5EB2B8331CAC971C00D0A847 /* M6502.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = M6502.h; sourceTree = "<group>"; };
 		5EB2B8341CAC971C00D0A847 /* Tables.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Tables.h; sourceTree = "<group>"; };
 		5EB2B8351CAC971C00D0A847 /* cpu.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cpu.c; sourceTree = "<group>"; };
-		5EB2B8361CAC971C00D0A847 /* mario.nes */ = {isa = PBXFileReference; lastKnownFileType = file; path = mario.nes; sourceTree = "<group>"; };
 		5EB2B8371CAC971C00D0A847 /* thumb.s */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.asm; path = thumb.s; sourceTree = "<group>"; };
 		5EB2B8381CAC971C00D0A847 /* makefile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.make; path = makefile; sourceTree = "<group>"; };
 		5EB2B8391CAC971C00D0A847 /* ppu.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ppu.c; sourceTree = "<group>"; };
@@ -115,7 +114,6 @@
 		5EB2B82D1CAC971C00D0A847 /* cpu */ = {
 			isa = PBXGroup;
 			children = (
-				5EB2B8361CAC971C00D0A847 /* mario.nes */,
 				5EB2B8301CAC971C00D0A847 /* M6502 */,
 				5EB2B82E1CAC971C00D0A847 /* cpu.h */,
 				5EB2B8351CAC971C00D0A847 /* cpu.c */,

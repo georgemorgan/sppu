@@ -231,34 +231,34 @@ void ppu_dma(void *source) {
 /* ~ Loads the pattern tables in from the filesystem and launches the NES emulator. ~ */
 int8_t ppu_emulate(char *rom) {
 
-//	/* ~ Obtain the base address of the iNES ROM from external memory. ~ */
-//	fsp _base = fs.data(rom);
-//
-//	/* ~ Verify that the ROM was opened succesfully. ~ */
-//	if (!_base) { error.raise(E_FS_NO_LEAF, ""); return -1; }
-//
-//	/* ~ Use the base address of the iNES ROM to calcuate the address of the PRG-ROM in external memory. ~ */
-//	_prg_rom = _base + 16;
-//
-//	/* ~ Use the base address of the PRG-ROM to calculate the address of the pattern tables in external memory. ~ */
-//	fsp pattern = _prg_rom + (2 * 16 * 1024);
-//
-//	/* ~ Begin a continuous read from external memory to pull in each byte of the pattern tables. ~ */
-//	at45.read(pattern);
-//
-//	/* ~ Reset the internal address latch. ~ */
-//	RESETLATCH();
-//
-//	/* ~ Latch the address of the pattern tables to begin DMA. ~ */
-//	ppu_write_internal(PPUADDR, 0x0000);
-//	ppu_write_internal(PPUADDR, 0x0000);
-//
-//	/* ~ Transfer the pattern tables from the filesystem into the video RAM. ~ */
-//	for (int i = 0; i < NES_PATTERN_TABLE_SIZE; i ++) {
-//		ppu_write_internal(PPUDATA, spi.get());
-//	}
-//
-//	/* ~ End the continuous read we began earlier. ~ */
-//	at45.disable();
+	/* ~ Obtain the base address of the iNES ROM from external memory. ~ */
+	fsp _base = fs.data(rom);
+
+	/* ~ Verify that the ROM was opened succesfully. ~ */
+	if (!_base) { error.raise(E_FS_NO_LEAF, ""); return -1; }
+
+	/* ~ Use the base address of the iNES ROM to calcuate the address of the PRG-ROM in external memory. ~ */
+	_prg_rom = _base + 16;
+
+	/* ~ Use the base address of the PRG-ROM to calculate the address of the pattern tables in external memory. ~ */
+	fsp _chr_rom = _prg_rom + NES_PRG_ROM_SIZE;
+
+	/* ~ Begin a continuous read from external memory to pull in each byte of the pattern tables. ~ */
+	at45.read(_chr_rom);
+
+	/* ~ Reset the internal address latch. ~ */
+	RESETLATCH();
+
+	/* ~ Latch the address of the pattern tables to begin DMA. ~ */
+	ppu_write_internal(PPUADDR, 0x0000);
+	ppu_write_internal(PPUADDR, 0x0000);
+
+	/* ~ Transfer the pattern tables from the filesystem into video RAM. ~ */
+	for (int i = 0; i < NES_CHR_ROM_SIZE; i ++) {
+		ppu_write_internal(PPUDATA, at45.get());
+	}
+
+	/* ~ End the continuous read that we began earlier. ~ */
+	at45.disable();
 
 }

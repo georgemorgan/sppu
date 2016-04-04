@@ -17,7 +17,8 @@
 #define PPUDATA   0x07
 
 /* ~ Miscelaneous NES constants. ~ */
-#define NES_PATTERN_TABLE_SIZE (2 * 1024)
+#define NES_PRG_ROM_SIZE (2 * 16 * 1024)
+#define NES_CHR_ROM_SIZE (2 * 1024)
 
 /* ~ Macros. ~ */
 #define RESETLATCH() ppu_read_internal(PPUSTATUS);
